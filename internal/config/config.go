@@ -59,6 +59,22 @@ func IsDebug() bool {
 	return os.Getenv("XUI_DEBUG") == "true"
 }
 
+// IsMieruEnabled returns true when ENABLE_MIERU_PROVIDER=true is set.
+// When false, no Mieru routes are registered, no job runs, and no mita
+// commands are ever called — the panel behaves exactly as before.
+func IsMieruEnabled() bool {
+	return strings.EqualFold(strings.TrimSpace(os.Getenv("ENABLE_MIERU_PROVIDER")), "true")
+}
+
+// GetMieruConfigDir returns the directory used to store generated mita config files.
+func GetMieruConfigDir() string {
+	folder := os.Getenv("XUI_MIERU_CONFIG_DIR")
+	if folder != "" {
+		return folder
+	}
+	return GetDBFolderPath() + "/mieru"
+}
+
 // IsSkipHSTS returns true if skipping HSTS mode is enabled via the XUI_SKIP_HSTS environment variable.
 func IsSkipHSTS() bool {
 	return os.Getenv("XUI_SKIP_HSTS") == "true"

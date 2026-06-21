@@ -326,6 +326,13 @@ func (s *Server) startTask(restartXray bool) {
 	s.cron.AddJob(cadenceMtproto, mtJob)
 	go mtJob.Run()
 
+	// Mieru provider — only active when ENABLE_MIERU_PROVIDER=true
+	if config.IsMieruEnabled() {
+		mieruJob := job.NewMieruJob()
+		s.cron.AddJob("@every 30s", mieruJob)
+		go mieruJob.Run()
+	}
+
 	// check client ips from log file every 10 sec
 	s.cron.AddJob(cadenceClientIPScan, job.NewCheckClientIpJob())
 

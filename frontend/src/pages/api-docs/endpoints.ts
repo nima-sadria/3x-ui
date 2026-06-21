@@ -1433,4 +1433,150 @@ export const sections: readonly Section[] = [
       },
     ],
   },
+
+  {
+    id: 'mieru',
+    title: 'Mieru Provider',
+    description:
+      'Manages the external Mieru proxy server via the <code>mita</code> binary. Mieru is NOT an Xray inbound — it has its own DB tables and lifecycle. Only available when <code>ENABLE_MIERU_PROVIDER=true</code> is set on the panel process.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/mieru/inbounds',
+        summary: 'List all Mieru inbounds.',
+        response: '[{ "id": 1, "name": "main", "enable": true, "tcpPortRange": "34787-34790", "udpPortRange": "33177", "mtu": 1400, "loggingLevel": "INFO" }]',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/mieru/inbounds/:id',
+        summary: 'Get a single Mieru inbound by ID.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Inbound ID.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/inbounds/add',
+        summary: 'Create a Mieru inbound. At least one of tcpPortRange or udpPortRange must be set.',
+        params: [
+          { name: 'name', in: 'body (json)', type: 'string', desc: 'Unique name.' },
+          { name: 'tcpPortRange', in: 'body (json)', type: 'string', optional: true, desc: 'e.g. "34787-34790".' },
+          { name: 'udpPortRange', in: 'body (json)', type: 'string', optional: true, desc: 'e.g. "33177".' },
+          { name: 'mtu', in: 'body (json)', type: 'integer', optional: true, defaultValue: 1400 },
+          { name: 'loggingLevel', in: 'body (json)', type: 'string', optional: true, defaultValue: 'INFO' },
+        ],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/inbounds/update/:id',
+        summary: 'Update a Mieru inbound.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Inbound ID.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/inbounds/del/:id',
+        summary: 'Delete a Mieru inbound and all its users.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Inbound ID.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/inbounds/setEnable/:id',
+        summary: 'Enable or disable a Mieru inbound.',
+        params: [
+          { name: 'id', in: 'path', type: 'integer', desc: 'Inbound ID.' },
+          { name: 'enable', in: 'body (json)', type: 'boolean', desc: 'true to enable, false to disable.' },
+        ],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/inbounds/apply/:id',
+        summary: 'Generate mita config for this inbound and run `mita apply config`. Backs up current config; rolls back on failure.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'Inbound ID.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/inbounds/applyAll',
+        summary: 'Apply the first enabled inbound to mita. If no inbound is enabled, stops mita gracefully.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/mieru/users/:inboundId',
+        summary: 'List all users for a given Mieru inbound.',
+        params: [{ name: 'inboundId', in: 'path', type: 'integer', desc: 'Inbound ID.' }],
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/mieru/user/:id',
+        summary: 'Get a single Mieru user by ID.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'User ID.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/users/add',
+        summary: 'Create a Mieru user. Password is auto-generated (32-char random) if omitted.',
+        params: [
+          { name: 'inboundId', in: 'body (json)', type: 'integer', desc: 'ID of the parent inbound.' },
+          { name: 'username', in: 'body (json)', type: 'string' },
+          { name: 'password', in: 'body (json)', type: 'string', optional: true, desc: 'Auto-generated if blank.' },
+          { name: 'trafficLimitGB', in: 'body (json)', type: 'integer', optional: true, defaultValue: 0, desc: '0 = unlimited.' },
+          { name: 'expiryTime', in: 'body (json)', type: 'integer', optional: true, defaultValue: 0, desc: 'Unix ms, 0 = never.' },
+        ],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/users/update/:id',
+        summary: 'Update a Mieru user.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'User ID.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/users/del/:id',
+        summary: 'Delete a Mieru user.',
+        params: [{ name: 'id', in: 'path', type: 'integer', desc: 'User ID.' }],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/users/setEnable/:id',
+        summary: 'Enable or disable a Mieru user. Disabling excludes the user from the next mita config apply.',
+        params: [
+          { name: 'id', in: 'path', type: 'integer', desc: 'User ID.' },
+          { name: 'enable', in: 'body (json)', type: 'boolean' },
+        ],
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/mieru/users/export/:inboundId/:userId',
+        summary: 'Download the Mieru client profile JSON for import into a Mieru-compatible client (e.g. Hiddify). Pass ?server=<host> to set the server address; defaults to the request Host header.',
+        params: [
+          { name: 'inboundId', in: 'path', type: 'integer' },
+          { name: 'userId', in: 'path', type: 'integer' },
+          { name: 'server', in: 'query', type: 'string', optional: true, desc: 'Server hostname/IP to embed in the profile.' },
+        ],
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/mieru/users/exportText/:inboundId/:userId',
+        summary: 'Return a plain-text summary of the Mieru client config (server, ports, username, password, MTU).',
+        params: [
+          { name: 'inboundId', in: 'path', type: 'integer' },
+          { name: 'userId', in: 'path', type: 'integer' },
+          { name: 'server', in: 'query', type: 'string', optional: true },
+        ],
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/mieru/status',
+        summary: 'Return mita availability, running state, and raw `mita status` output. Always 200; errors are in the response body.',
+        response: '{\n  "success": true,\n  "obj": {\n    "mitaAvailable": true,\n    "running": true,\n    "statusOutput": "mita is running",\n    "configOutput": "...",\n    "error": ""\n  }\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/start',
+        summary: 'Run `mita start`. Returns an error message if mita is not installed.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/mieru/stop',
+        summary: 'Run `mita stop`. Returns an error message if mita is not installed.',
+      },
+    ],
+  },
 ];

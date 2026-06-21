@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/config"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
@@ -22,6 +23,7 @@ type APIController struct {
 	hostController        *HostController
 	settingController     *SettingController
 	xraySettingController *XraySettingController
+	mieruController       *MieruController
 	settingService        service.SettingService
 	userService           panel.UserService
 	apiTokenService       panel.ApiTokenService
@@ -105,6 +107,12 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	// /panel/api/xray/*.
 	a.settingController = NewSettingController(api)
 	a.xraySettingController = NewXraySettingController(api)
+
+	// Mieru provider routes — only registered when ENABLE_MIERU_PROVIDER=true
+	if config.IsMieruEnabled() {
+		mieru := api.Group("/mieru")
+		a.mieruController = NewMieruController(mieru)
+	}
 
 	// Extra routes
 	api.POST("/backuptotgbot", a.BackuptoTgbot)
