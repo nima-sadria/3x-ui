@@ -94,8 +94,8 @@ func buildPortBindings(tcpRange, udpRange string) ([]PortBinding, error) {
 		out = append(out, PortBinding{Protocol: "TCP", PortRange: tcp})
 	}
 	if udp != "" {
-		if err := validatePortRange(udp); err != nil {
-			return nil, fmt.Errorf("mieru: invalid udpPortRange %q: %w", udp, err)
+		if err := ValidateUDPPortRange(udp); err != nil {
+			return nil, fmt.Errorf("mieru: invalid udpPortRange: %w", err)
 		}
 		out = append(out, PortBinding{Protocol: "UDP", PortRange: udp})
 	}
@@ -122,8 +122,18 @@ func validatePortRange(s string) error {
 			return fmt.Errorf("port %d out of range [1,65535]", n)
 		}
 	}
-	if len(parts) == 2 {
-		// already validated each side above; nothing more to check here
+	return nil
+}
+
+// ValidateUDPPortRange is like validatePortRange but additionally rejects single
+// ports. mita requires UDP bindings to be expressed as an explicit range even
+// when only one port is intended — use "33177-33177" not "33177".
+func ValidateUDPPortRange(s string) error {
+	if err := validatePortRange(s); err != nil {
+		return err
+	}
+	if !strings.Contains(s, "-") {
+		return fmt.Errorf("UDP port range %q must be a dash-separated range (e.g. %s-%s); mita does not accept single ports for UDP", s, s, s)
 	}
 	return nil
 }

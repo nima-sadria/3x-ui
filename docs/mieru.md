@@ -107,8 +107,11 @@ override the server address embedded in the client profile.
 }
 ```
 
-At least one of `tcpPortRange` or `udpPortRange` must be set. Port ranges are
-either a single port (`"9000"`) or a dash-separated range (`"9000-9003"`).
+At least one of `tcpPortRange` or `udpPortRange` must be set.
+
+**TCP** accepts either a single port (`"34787"`) or a dash-separated range (`"34787-34790"`).
+
+**UDP requires an explicit dash-separated range** — even for a single port. Use `"33177-33177"` not `"33177"`. mita rejects single-port UDP values and will return an error on apply. The panel validates this at create/update time so the error surfaces before any `mita` call is made.
 
 ## User JSON schema
 

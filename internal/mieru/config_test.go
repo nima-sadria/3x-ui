@@ -165,6 +165,63 @@ func TestValidatePortRange(t *testing.T) {
 	}
 }
 
+func TestValidateUDPPortRange(t *testing.T) {
+	cases := []struct {
+		input   string
+		wantErr bool
+		reason  string
+	}{
+		{"33177-33180", false, "explicit range — valid"},
+		{"33177-33177", false, "single port expressed as range — valid"},
+		{"1-65535", false, "full range — valid"},
+		{"33177", true, "single port without dash — rejected by mita"},
+		{"9000", true, "single port without dash — rejected by mita"},
+		{"0-100", true, "port 0 out of range"},
+		{"65536-65537", true, "port over max"},
+		{"abc-def", true, "non-numeric"},
+		{"", true, "empty string"},
+		{"-100", true, "leading dash"},
+	}
+	for _, tc := range cases {
+		err := ValidateUDPPortRange(tc.input)
+		if (err != nil) != tc.wantErr {
+			t.Errorf("ValidateUDPPortRange(%q) [%s]: wantErr=%v got err=%v", tc.input, tc.reason, tc.wantErr, err)
+		}
+	}
+}
+
+func TestBuildConfig_udpSinglePortRejected(t *testing.T) {
+	ib := &model.MieruInbound{
+		Id:           10,
+		Name:         "udp-single",
+		UDPPortRange: "33177", // single port — mita rejects this
+		MTU:          1400,
+	}
+	_, err := BuildConfig(ib, nil)
+	if err == nil {
+		t.Fatal("expected error for single UDP port without dash")
+	}
+	if !strings.Contains(err.Error(), "dash-separated") {
+		t.Errorf("error should mention dash-separated range, got: %v", err)
+	}
+}
+
+func TestBuildConfig_udpExplicitRangeAccepted(t *testing.T) {
+	ib := &model.MieruInbound{
+		Id:           11,
+		Name:         "udp-range",
+		UDPPortRange: "33177-33177", // single port as explicit range — valid
+		MTU:          1400,
+	}
+	cfg, err := BuildConfig(ib, nil)
+	if err != nil {
+		t.Fatalf("BuildConfig: %v", err)
+	}
+	if len(cfg.PortBindings) != 1 || cfg.PortBindings[0].Protocol != "UDP" {
+		t.Errorf("expected 1 UDP binding, got %+v", cfg.PortBindings)
+	}
+}
+
 func TestClientExportJSON(t *testing.T) {
 	ib := &model.MieruInbound{
 		Id:           1,

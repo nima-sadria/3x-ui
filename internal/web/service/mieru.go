@@ -314,6 +314,11 @@ func validateInbound(ib *model.MieruInbound) error {
 	if strings.TrimSpace(ib.TCPPortRange) == "" && strings.TrimSpace(ib.UDPPortRange) == "" {
 		return errors.New("at least one of tcpPortRange or udpPortRange is required")
 	}
+	if udp := strings.TrimSpace(ib.UDPPortRange); udp != "" {
+		if err := mieru.ValidateUDPPortRange(udp); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
