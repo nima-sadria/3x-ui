@@ -2214,6 +2214,10 @@
     {
       "name": "WebSocket",
       "description": "Real-time status updates via WebSocket. Connect once at <code>ws://<panel>/ws</code> to receive a stream of JSON messages without polling. Requires an authenticated session cookie (Bearer token auth is not supported). Each message has a <code>type</code> field that identifies the payload shape."
+    },
+    {
+      "name": "Mieru Provider",
+      "description": "Manages the external Mieru proxy server via the <code>mita</code> binary. Mieru is NOT an Xray inbound — it has its own DB tables and lifecycle. Only available when <code>ENABLE_MIERU_PROVIDER=true</code> is set on the panel process."
     }
   ],
   "paths": {
@@ -9863,6 +9867,765 @@
                 "example": {
                   "type": "invalidate",
                   "resource": "inbounds"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/inbounds": {
+      "get": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "List all Mieru inbounds.",
+        "operationId": "get_panel_api_mieru_inbounds",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "main",
+                    "enable": true,
+                    "tcpPortRange": "34787-34790",
+                    "udpPortRange": "33177",
+                    "mtu": 1400,
+                    "loggingLevel": "INFO"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/inbounds/{id}": {
+      "get": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Get a single Mieru inbound by ID.",
+        "operationId": "get_panel_api_mieru_inbounds_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inbound ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/inbounds/add": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Create a Mieru inbound. At least one of tcpPortRange or udpPortRange must be set.",
+        "operationId": "post_panel_api_mieru_inbounds_add",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/inbounds/update/{id}": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Update a Mieru inbound.",
+        "operationId": "post_panel_api_mieru_inbounds_update_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inbound ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/inbounds/del/{id}": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Delete a Mieru inbound and all its users.",
+        "operationId": "post_panel_api_mieru_inbounds_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inbound ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/inbounds/setEnable/{id}": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Enable or disable a Mieru inbound.",
+        "operationId": "post_panel_api_mieru_inbounds_setEnable_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inbound ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/inbounds/apply/{id}": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Generate mita config for this inbound and run `mita apply config`. Backs up current config; rolls back on failure.",
+        "operationId": "post_panel_api_mieru_inbounds_apply_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inbound ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/inbounds/applyAll": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Apply the first enabled inbound to mita. If no inbound is enabled, stops mita gracefully.",
+        "operationId": "post_panel_api_mieru_inbounds_applyAll",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/users/{inboundId}": {
+      "get": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "List all users for a given Mieru inbound.",
+        "operationId": "get_panel_api_mieru_users_inboundId",
+        "parameters": [
+          {
+            "name": "inboundId",
+            "in": "path",
+            "required": true,
+            "description": "Inbound ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/user/{id}": {
+      "get": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Get a single Mieru user by ID.",
+        "operationId": "get_panel_api_mieru_user_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/users/add": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Create a Mieru user. Password is auto-generated (32-char random) if omitted.",
+        "operationId": "post_panel_api_mieru_users_add",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/users/update/{id}": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Update a Mieru user.",
+        "operationId": "post_panel_api_mieru_users_update_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/users/del/{id}": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Delete a Mieru user.",
+        "operationId": "post_panel_api_mieru_users_del_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/users/setEnable/{id}": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Enable or disable a Mieru user. Disabling excludes the user from the next mita config apply.",
+        "operationId": "post_panel_api_mieru_users_setEnable_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/users/export/{inboundId}/{userId}": {
+      "get": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Download the Mieru client profile JSON for import into a Mieru-compatible client (e.g. Hiddify). Pass ?server=<host> to set the server address; defaults to the request Host header.",
+        "operationId": "get_panel_api_mieru_users_export_inboundId_userId",
+        "parameters": [
+          {
+            "name": "inboundId",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "server",
+            "in": "query",
+            "required": false,
+            "description": "Server hostname/IP to embed in the profile.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/users/exportText/{inboundId}/{userId}": {
+      "get": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Return a plain-text summary of the Mieru client config (server, ports, username, password, MTU).",
+        "operationId": "get_panel_api_mieru_users_exportText_inboundId_userId",
+        "parameters": [
+          {
+            "name": "inboundId",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "server",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/status": {
+      "get": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Return mita availability, running state, and raw `mita status` output. Always 200; errors are in the response body.",
+        "operationId": "get_panel_api_mieru_status",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "mitaAvailable": true,
+                    "running": true,
+                    "statusOutput": "mita is running",
+                    "configOutput": "...",
+                    "error": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/start": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Run `mita start`. Returns an error message if mita is not installed.",
+        "operationId": "post_panel_api_mieru_start",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/mieru/stop": {
+      "post": {
+        "tags": [
+          "Mieru Provider"
+        ],
+        "summary": "Run `mita stop`. Returns an error message if mita is not installed.",
+        "operationId": "post_panel_api_mieru_stop",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
                 }
               }
             }
